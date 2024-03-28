@@ -26,7 +26,7 @@ To sign a message $m$, an entity $A$ with domain parameters $D = (q, F_R, a, b, 
 
 2. Compute $k_P = x_1, y_1 and r = x_1 mod (n)$ (where $x_1$ is regarded as an integer between 0 and $q - 1$). If $r = 0$, then go back to step 1
 
-3. Compute $k^(-1) \mod (n)$
+3. Compute $k^{-1} \mod (n)$
 
 4. Compute $s = k^{-1} {h(m) + d*r} \mod (n)$, where $h$ is the Secure Hash Algorithm (SHA-1). If s = 0, then go back to step 1. 
 
