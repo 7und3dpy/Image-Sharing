@@ -24,7 +24,7 @@ To sign a message $m$, an entity $A$ with domain parameters $D = (q, F_R, a, b, 
 
 1. Select a random or pseudorandom integer $k$ in the interval $[1, n-1]$
 
-2. Compute $k_P = x_1, y_1 and r = x_1 mod (n)$ (where $x_1$ is regarded as an integer between 0 and $q - 1$). If $r = 0$, then go back to step 1
+2. Compute $k_P = x_1, y_1$ and $r = x_1 \mod (n)$ (where $x_1$ is regarded as an integer between 0 and $q - 1$). If $r = 0$, then go back to step 1
 
 3. Compute $k^{-1} \mod (n)$
 
