@@ -2,7 +2,7 @@
 
 Signature algorithm is used for authenticating a device or a message sent by the device. For example consider two devices A and B. To authenticate a message sent by A, the device A **signs the message using its private key**. The device A sends the message and the signature to the device B. This signature can be **verified only by using the public key** of device A. Since the device B knows A’s public key, it can verify whether the message is indeed send by A or not.
 
-ECDSA is a variant of the **Digital Signature Algorithm (DSA)** that operates on elliptic curve groups. For sending a signed message from A to B, both have to agree up on **Elliptic Curve domain parameters**. Sender ‘A’ have a key pair consisting of a private key dA (a randomly selected integer less than n, where n is the order of the curve, an elliptic curve domain parameter) and a public key QA = dA * G (G is the generator point, an elliptic curve domain parameter). An overview of ECDSA process is defined below.
+ECDSA is a variant of the **Digital Signature Algorithm (DSA)** that operates on elliptic curve groups. For sending a signed message from A to B, both have to agree up on **Elliptic Curve domain parameters**. Sender ‘A’ have a key pair consisting of a private key $d_A$ (a randomly selected integer less than $n$, where $n$ is the order of the curve, an elliptic curve domain parameter) and a public key $Q_A = d_A * G$ ($G$ is the generator point, an elliptic curve domain parameter). An overview of ECDSA process is defined below.
 
 ECDSA has three phases 
 
@@ -12,17 +12,17 @@ ECDSA has three phases
 
 # ECDSA Key Generation
 
-An entity A's key pair is associated with a particular set of EC domain parameters $D = (q, FR, a, b, G, n, h)$. $E$ is an elliptic curve defined over $F_q$, and $P$ is a point of prime order $n$ in $E(F_q)$, $q$ is a prime. Each entity $A$ does the following 
+An entity A's key pair is associated with a particular set of EC domain parameters $D = (q, F_R, a, b, G, n, h)$. $E$ is an elliptic curve defined over $F_q$, and $P$ is a point of prime order $n$ in $E(F_q)$, $q$ is a prime. Each entity $A$ does the following 
 
-1. Select the random integer $d$ in the interval [1, n - 1]
+1. Select the random integer $d$ in the interval $[1, n - 1]$
 2. Compute $Q = d_P$
 3. A's public key is Q, A's private key is $d$
 
 # ECDSA Signature Generation
 
-To sign a message m, an entity $A$ with domain parameters $D = (q, F_R, a, b, G, n, h)$ does the following
+To sign a message $m$, an entity $A$ with domain parameters $D = (q, F_R, a, b, G, n, h)$ does the following
 
-1. Select a random or pseudorandom integer k in the interval $[1, n-1]$
+1. Select a random or pseudorandom integer $k$ in the interval $[1, n-1]$
 
 2. Compute $k_P = x_1, y_1 and r = x_1 mod (n)$ (where $x_1$ is regarded as an integer between 0 and $q - 1$). If $r = 0$, then go back to step 1
 
@@ -52,3 +52,12 @@ To verify A's signature $(r, s)$ on $m, B$ obtains an authenticated copy of A's 
 
 
 ![alt text](sigver.png)
+
+
+**Notes**: In public key cryptography each user or the device taking part in the communication generally have a pair of keys, a public key and a private key, and a set of operations associated with the keys to do the cryptographic operations. Only the particular user knows the private key whereas the public key is distributed to all users taking part in the communication.
+
+The public key is a point on the curve and the private key is a random number. The public key is obtained by multiplying the private key with a generator point G in the curve.
+
+The mathematical operations of ECC is defined over the elliptic curve y^2 = x^3 + ax + b, where 4a^3 + 27b^2 ≠ 0. Each value of the ‘a’ and ‘b’ gives a different elliptic curve.
+
+One main advantage of ECC is its small key size. A 160-bit key in ECC is considered to be as secured as 1024-bit key in RSA.
