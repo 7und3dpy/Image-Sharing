@@ -12,47 +12,119 @@ ECDSA has three phases
 
 # ECDSA Key Generation
 
-An entity A's key pair is associated with a particular set of EC domain parameters $D = (q, F_R, a, b, G, n, h)$. $E$ is an elliptic curve defined over $F_q$, and $P$ is a point of prime order $n$ in $E(F_q)$, $q$ is a prime. Each entity $A$ does the following 
+An entity A's key pair is associated with a particular set of EC domain parameters $D = (CURVE, G, n, d_A, Q_A, m)$. 
+
+
+- $CURVE$ is the elliptic curve field and equation used
+
+- $G$ is elliptic curve base point, a point on the curve that generate a subgroup of large prime order n
+
+- $n$ is the integer order of $G$, means that $n \times G = O$, where $O$ is the identity element. 
+
+- $d_A$ is the private key (randomly selected)
+
+- $Q_A$ is the public key $d_A \times G$ (calculated by elliptic curve)
+
+- $m$ is the message to send. 
+
+The order n of the base point G **must be prime**
+
 
 1. Select the random integer $d$ in the interval $[1, n - 1]$
-2. Compute $Q = d_P$
+
+2. Compute $Q = d_A \times G$. We use $\times$ to denote elliptic curve point multiplication by a scalar. 
+
 3. A's public key is Q, A's private key is $d$
 
 # ECDSA Signature Generation
 
+
+
 To sign a message $m$, an entity $A$ with domain parameters $D = (q, F_R, a, b, G, n, h)$ does the following
 
-1. Select a random or pseudorandom integer $k$ in the interval $[1, n-1]$
+For Alice to sign a message $m$, she follows these steps: 
 
-2. Compute $k_P = x_1, y_1$ and $r = x_1 \mod (n)$ (where $x_1$ is regarded as an integer between 0 and $q - 1$). If $r = 0$, then go back to step 1
+1. Calculate $e = $HASH(m). (Here HASH is a cryptographic hash function, such as SHA-2, with the output converted to integer)
 
-3. Compute $k^{-1} \mod (n)$
+2. Let $z$ be the $L_n$ leftmost bits of $e$, where $L_n$ is the bit length of the group order of $n$. (Note that $z$ can be *greater* than $n$ but not longer.)
 
-4. Compute $s = k^{-1} {h(m) + d*r} \mod (n)$, where $h$ is the Secure Hash Algorithm (SHA-1). If s = 0, then go back to step 1. 
 
-5. The signature for the message $m$ is the pair of integers $(r, s)$
+3. Select a random or pseudorandom integer $k$ in the interval $[1, n-1]$
 
+4. Calculate the curve point $(x_1, y_1) = k \times G$
+
+5. Calculate $r = x_1 \mod n$. If $r = 0$, go back to step 3
+
+6. Compute $s = k^{-1} (z + rd_A) \mod (n)$. If $s = 0$, go back to step 3. 
+
+7. The signature is the pair $(r, s)$. (And ($r, -s \mod n$) is also a valid signature)
+
+**Notes**: 
+
+It is not only required for $k$ to be secret, but it is also crucial to select different $k$ for different signatures. Otherwise, the equation in step 6 can be solved for $d_A$, the private key: the given two signatures $(r, s)$ and $(r, s^\prime)$. If not, the equation is step 6 can be solved for $d_A$, the private key: given two signatures $(r, s)$ and $(r, s^\prime)$, employing the same unknown $k$ for different known message $m$ and $n^\prime$, an attacker can calculate $z$ and $z^\prime$, and since $s - s^\prime = k^{-1} (z - z^\prime)$ (all operations in this paragraph are done modulo $n$) the attacker can find $k = \frac{z - z^\prime}{s - s^\prime}$. Since $s = k^{-1}(z + rd_A)$, the attacker can now calculate the private key $d_A = \frac{sk - z}{r}$
 
 ![alt text](siggen.jpg)
 
 
 # ECDSA Signature Verification
 
-To verify A's signature $(r, s)$ on $m, B$ obtains an authenticated copy of A's domain parameters $D = (q, F_R, a, b, G, n, h)$ and public key $Q$ and do the following: 
 
-1. Verify that $r$ and $s$ are integers in the interval [1, n - 1]
+For Bob to authenticate Alice's signature, he must have a copy of her public-key curve point $Q_A$. Bob can verify $Q_A$ is a valid curve point as follows: 
 
-2. Compute $w = s^{-1} \mod (n)$ and $h(m)$
+1. Check that $Q_A$ is not equal to the identity element $O$, and its coordinates are otherwise valid. 
 
-3. Compute $k^{-1} \mod (n)$
+2. Check that $Q_A$ lies on the curve.
 
-4. Compute $u_1*P + u_2*Q = (x_0, y_0)$ and $v = x_0 \mod (n)$
+3. Check that $n \times Q_A = O$
 
-5. Accept the signature if and only if $v = r$
+After that, Bob follows these steps: 
+
+1. Verify that $r$ and $s$ are integers in $[1, n - 1]$. If not, the signature is invalid
+
+2. Calculate $e = HASH(m)$, where HASH is the same function used in the signature generation
+
+3. Let $z$ be the $L_n$ leftmost bits of $e$. 
+
+4. Calculate $u_1 = zs^{-1} \mod n$ and $u_2 = rs^{-1} \mod n$
+
+5. Calculate the curve point $(x_1, y_1) = u_1 \times G + u_2 \times Q_A$. If $(x_1, y_1) = O$ then the signature is invalid
+
+6. The signature is valid if $r \equiv x_1 (\mod n)$, invalid otherwise. 
+
+Note that an efficient implementation would compute inverse $s^-1 \mod n$ only once. Also, using Shamir's trick, a sum of two scalar multiplications $u_1 \times G + u_2 \times Q_A$ can be calculated faster than two scalar multiplications done independently. 
+
 
 
 ![alt text](sigver.png)
 
+### Correctness of the algorithm
+
+It is not immediately obvious why verification even functions correctly. To see why, denote as $C$ the curve point computed in step 5 of verification, 
+
+$$C = u_1 \times G + u_2 \times Q_A$$
+
+From the definition of the public key as $Q_A = d_A \times G$, 
+
+$$C = u_1 \times G + u_2d_A \times G$$
+
+Because elliptic curve scalar multiplication distributes over addition, 
+
+
+$$C = (u_1 + u_2d_A) \times G$$
+
+Expanding the definition of $u_1$ and $u_2$ from verification step 4, 
+
+$$C = (zs^{-1} + rd_As^{-1}) \times G$$
+
+Collecting the common term $s^{-1}$, 
+
+$$C = (z + rd_A)s^{-1} \times G$$
+
+Since the inverse of an inverse is the original element, and the product of an element's inverse and the element is the identity, we are left with 
+
+$$C = k \time G$$
+
+(Q.E.D)
 
 **Notes**: In public key cryptography each user or the device taking part in the communication generally have a pair of keys, a public key and a private key, and a set of operations associated with the keys to do the cryptographic operations. Only the particular user knows the private key whereas the public key is distributed to all users taking part in the communication.
 
