@@ -1,18 +1,18 @@
 import random
 
-class BigMod: 
+class BigMod:
     @staticmethod
-    def add(x, y, n): 
+    def add(x, y, n):
         return (x + y) % n
-    
+
     @staticmethod
-    def mul(x, y, n): 
+    def mul(x, y, n):
         p = 0
 
         x = x % n
 
-        while y > 0: 
-            if y & 1: 
+        while y > 0:
+            if y & 1:
                 p = BigMod.add(p, x, n)
 
             x = (x << 1) % n
@@ -20,92 +20,79 @@ class BigMod:
             y = y >> 1
 
         return p
-    
+
     @staticmethod
     def power(x, p, n):
         y = 1
 
         x = x % n
 
-        if p == 0: 
+        if p == 0:
             return y
-        
-        while p > 0: 
-            if p & 1: 
-                y = BigMod.mul(y,x,n)
+
+        while p > 0:
+            if p & 1:
+                y = BigMod.mul(y, x, n)
 
             p = p >> 1
-            
+
             x = BigMod.mul(x, x, n)
 
         return y
-    
 
-class XEuclidean: 
+
+class XEuclidean:
     @staticmethod
-    def extended_gcd(a, b): 
-        if a == 0: 
+    def extended_gcd(a, b):
+        if a == 0:
             return b, 0, 1
-        
+
         g, y, x = XEuclidean.extended_gcd(b % a, a)
         return g, x - (b // a) * y, y
-    
+
     @staticmethod
-    def inverse_modulo(a, m): 
+    def inverse_modulo(a, m):
         g, x, _ = XEuclidean.extended_gcd(a, m)
 
-        if g != 1: 
-            raise Exception('Inverse modular does not exist')
-        
+        if g != 1:
+            raise Exception('Inverse modular does not exist.')
         return x % m
-    
 
-class RSA: 
+
+class RSA:
     @staticmethod
-    def generete(p, q): 
+    def generate(p, q):
         n = p * q
+        phi = (p - 1) * (q - 1)
 
-        phi = (p -1) * (q - 1)
-
-        while True: 
+        while 1:
             d = random.randrange(1, phi)
             g, _, _ = XEuclidean.extended_gcd(d, phi)
-            if g == 1: 
+            if g == 1:
                 break
 
         e = XEuclidean().inverse_modulo(d, phi)
 
         return n, e, d
-    
-    @staticmethod
-    def encode(message): 
-        return [ord(c) for c in message]
 
     @staticmethod
-    def decode(plain): 
-        return ''.join([chr(c) for c in plain])
-
-    @staticmethod
-    def encrypt(message, public_key, n): 
+    def encrypt(message, public_key, n):
         public_key = int(public_key)
-
         n = int(n)
 
-        cipher_arr = [BigMod.power(m, public_key, n) for m in RSA.encode(message)]
-
+        cipher_array = [BigMod.power(m, public_key, n) for m in RSA.encode(message)]
+        
         cipher = ''
-
-        for c in cipher_arr[:-1]: 
+        for c in cipher_array[:-1]:
             cipher += str(c) + ' '
-
-        cipher += str(cipher_arr[-1])
-
+        
+        cipher += str(cipher_array[-1])
+        
         return cipher
-    
+
     @staticmethod
     def decrypt(message, private_key, n):
         private_key = int(private_key)
-
         n = int(n)
 
         return RSA.decode(
@@ -114,11 +101,18 @@ class RSA:
                 for c in message.rstrip().split(' ')
             ]
         )
-    
 
-class PrimeGen: 
-    def __init__(self): 
-        self.__first_prime_list = [
+    @staticmethod
+    def encode(message):
+        return [ord(c) for c in message]
+
+    @staticmethod
+    def decode(plain):
+        return ''.join([chr(c) for c in plain])
+
+class PrimeGen:
+    def __init__(self):
+        self.__first_primes_list = [
             2, 3, 5, 7, 11, 13, 17, 19, 23, 29,
             31, 37, 41, 43, 47, 53, 59, 61, 67,
             71, 73, 79, 83, 89, 97, 101, 103,
@@ -220,65 +214,51 @@ class PrimeGen:
             7573, 7577, 7583, 7589, 7591, 7603, 7607, 7621, 7639, 7643,
             7649, 7669, 7673, 7681, 7687, 7691, 7699, 7703, 7717, 7723,
             7727, 7741, 7753, 7757, 7759, 7789, 7793, 7817, 7823, 7829,
-            7841, 7853, 7867, 7873, 7877, 7879, 7883, 7901, 7907, 7919            
-        ]
+            7841, 7853, 7867, 7873, 7877, 7879, 7883, 7901, 7907, 7919]
 
-    def nBitNumberRandom(self, n): 
-        return random.randrange(2**(n - 1) + 1 , 2 ** n - 1)
-    
-    def getLowLevelPrime(self, n): 
+    def nBitNumberRandom(self, n):
+        return random.randrange(2 ** (n - 1) + 1, 2 ** n - 1) 
+ 
+    def getLowLevelPrime(self, n):
+        '''Kiểm thử yếu
         '''
-        Kiểm thử yếu
-        '''
-
-        while True: 
+        while True:
             flag = 0
-
-            pc = self.nBitNumberRandom(n)
-
-            for divisor in self.__first_prime_list:
-                # Nếu chia hết nhưng bình phương của số chia lớn hơn số bị chia => số bị chia bằng số chia. 
-                if pc % divisor == 0 and divisor**2 <= pc: 
-                    # prime candidate đã thất bại
-                    flag = 1
-                    break
-
-            if flag == 0: 
-                return pc
             
-    def MillerRabinTest(self, a, m, n, r):
-        '''
-        a: số ngẫu nhiên trong khoảng [2, n-1]
-        n - 1 = 2^r * m
-        '''
-
-        # a ^ m mod n = 1
-        if pow(a, m, n) == 1: 
+            pc = self.nBitNumberRandom(n)
+            
+            for divisor in self.__first_primes_list:
+                if pc % divisor == 0 and divisor**2 <= pc: #Nếu chia hết nhưng bình phương của số chia lớn hơn số bị chia => số bị chia bằng số chia.
+                    flag = 1 #prime candidate đã thất bại.
+                    break
+            
+            if flag == 0:
+                return pc
+ 
+    def MillerRabinTest(self, a, m, n, r):        # a: số ngẫu nhiên trong khoảng [2, n-1];  n-1 = 2^r * m
+        if pow(a, m, n) == 1:              # a^m mod n = 1 
             return True
-        
-        for i in range(0, r): 
-            if pow(a, 2**i * m, n) == n - 1: 
+        for i in range(0, r):
+            if pow(a, 2**i * m, n) == n-1:
                 return True
         return False
-    
-    def primeTest(self, n): 
-        temp = n - 1
-        # n - 1 = 2^r * m
-        r = 0
-        while temp % 2 == 0: 
-            temp = temp >> 1
-            r += 1
 
-        # Số lần lặp kiểm tra
-        numberOfRabinMillerTests = 20 
-        for i in range(numberOfRabinMillerTests): 
+    def primeTest(self, n):
+        temp = n-1                           
+        r = 0                               # n - 1 = 2^r * m
+        while temp % 2 == 0:
+            temp = temp >> 1
+            r = r + 1
+
+        numberOfRabinMillerTests = 20      # Số lần lặp để kiểm tra.
+        for i in range(numberOfRabinMillerTests):
             a = random.randrange(2, n)
-            if not self.MillerRabinTest(a, temp, n, r): 
-                return False
+            if not self.MillerRabinTest(a, temp, n, r):
+                return False   
         return True
-    
-    def primeGen(self, lambdas): 
-        while True: 
-            prime_candidate = self.getLowLevelPrime(lambdas)
-            if self.primeTest(prime_candidate): 
+
+    def primeGen(self, lambla):
+        while True:
+            prime_candidate = self.getLowLevelPrime(lambla)
+            if self.primeTest(prime_candidate):
                 return prime_candidate
