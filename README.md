@@ -122,7 +122,7 @@ $$C = (z + rd_A)s^{-1} \times G$$
 
 Since the inverse of an inverse is the original element, and the product of an element's inverse and the element is the identity, we are left with 
 
-$$C = k \time G$$
+$$C = k \times G$$
 
 (Q.E.D)
 
