@@ -9,7 +9,6 @@ from .modules.PingPong import PingPong
 from .modules.Register import Register
 from .modules.Login import Login
 from .modules.Logout import Logout
-from .modules.Logout import Logout
 from .modules.UploadImages import UploadImages
 from .modules.DownloadImages import DownloadImages
 from .modules.Sharing import Sharing
@@ -33,7 +32,6 @@ def create_app(test_config = None):
         app.config.from_mapping(test_config)
 
     # ensure the instance folder exists
-
     try:
         os.makedirs(app.instance_path)
     except OSError:
