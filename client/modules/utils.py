@@ -2,32 +2,28 @@ from PIL import Image
 
 import os
 
-class Utils: 
+class Utils:
     @staticmethod
-    def clrsrc(): 
-        '''
-        Clear the screen
+    def clrscr():
+        '''Clear the screen
         '''
         os.system('clear') if os.name == 'posix' else os.system('cls')
-
+    
     @staticmethod
-    def pause(): 
+    def pause():
+        '''Pause the screen before clearing
         '''
-        Pause the screen before clearing 
-        '''
-        input('Press any key to continue')
-
+        input('Press any key to continue..')
+    
     @staticmethod
-    def convert_to_encryptable(img_path): 
-        '''
-        Convert an image of any type to encryptable type. 
+    def convert_to_encryptable(img_path):
+        '''Convert an image of any type to encryptable type.
 
-        Input: 
+        Input:
             - img_path: path to the image
         
-            
-        Output: 
-            - Converted image
+        Output:
+            - converted image.
         '''
 
         encryptable_type = '{0}.png'
@@ -36,7 +32,7 @@ class Utils:
 
         new_filename = encryptable_type.format(filename)
 
-        with Image.open(img_path) as img: 
+        with Image.open(img_path) as img:
             img.save(new_filename)
 
         return new_filename, os.path.basename(img_path)
