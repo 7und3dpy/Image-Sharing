@@ -1,3 +1,0 @@
-ID: 1
-Public_key: 2386021593
-Private_key: 103906077
