@@ -1,4 +1,4 @@
-Full API documentation can be found [here](https://documenter.getpostman.com/view/18981203/UVRHiiVn)
+Full API documentation can be found [here](https://documenter.getpostman.com/view/34877729/2sA3JNazzm)
 
 You might want to install these softwares:
 
